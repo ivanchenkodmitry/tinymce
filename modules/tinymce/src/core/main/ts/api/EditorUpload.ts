@@ -7,13 +7,14 @@
 
 import { HTMLImageElement, Blob } from '@ephox/dom-globals';
 import { Arr } from '@ephox/katamari';
-import { Uploader } from '../file/Uploader';
+import {Uploader, UploadResult} from '../file/Uploader';
 import { BlobInfoImagePair, ImageScanner } from '../file/ImageScanner';
 import { BlobCache } from './file/BlobCache';
 import UploadStatus from '../file/UploadStatus';
 import ErrorReporter from '../ErrorReporter';
 import Editor from './Editor';
 import Settings from './Settings';
+import DOMUtils from 'tinymce/core/api/dom/DOMUtils';
 
 /**
  * Handles image uploads, updates undo stack and patches over various internal functions.
@@ -107,6 +108,27 @@ const EditorUpload = function (editor: Editor): EditorUpload {
     });
   };
 
+  const replacePictureUri = function (image: HTMLImageElement, uploadInfo: UploadResult) {
+    const resultUri = uploadInfo.url;
+    const picture = image.parentNode;
+    blobCache.removeByUri(image.src);
+    replaceUrlInUndoStack(image.src, resultUri);
+
+    editor.$(image).attr({
+      'src': Settings.shouldReuseFileName(editor) ? resultUri + cacheInvalidator() : resultUri,
+      'data-mce-src': editor.convertURL(resultUri, 'src')
+    });
+
+    for (const item of uploadInfo.opts.sourceList) {
+      picture.appendChild(DOMUtils.DOM.create('source', { srcset: item.srcset, media: item.media, type: item.type }));
+    }
+    if (uploadInfo.opts.sourceList.length > 0) {
+      picture.removeChild(image);
+      picture.appendChild(image);
+    }
+
+  };
+
   const uploadImages = function (callback?) {
     if (!uploader) {
       uploader = Uploader(uploadStatus, {
@@ -129,7 +151,13 @@ const EditorUpload = function (editor: Editor): EditorUpload {
           const image = imageInfos[index].image;
 
           if (uploadInfo.status && Settings.shouldReplaceBlobUris(editor)) {
-            replaceImageUri(image, uploadInfo.url);
+
+            if (editor.settings.paste_as_picture) {
+              replacePictureUri(image, uploadInfo);
+            } else {
+              replaceImageUri(image, uploadInfo.url);
+            }
+
           } else if (uploadInfo.error) {
             ErrorReporter.uploadError(editor, uploadInfo.error);
           }

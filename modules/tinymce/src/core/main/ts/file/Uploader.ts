@@ -11,6 +11,7 @@ import { XMLHttpRequest } from '@ephox/sand';
 import Promise from '../api/util/Promise';
 import Tools from '../api/util/Tools';
 import { BlobInfo } from '../api/file/BlobCache';
+import {ImageData} from '../../../../../lib/plugins/picture/main/ts/core/ImageData';
 
 /**
  * Upload blobs or blob infos to the specified URL or handler.
@@ -39,6 +40,7 @@ export interface UploadResult {
   blobInfo: BlobInfo;
   status: boolean;
   error?: string;
+  opts?: ImageData;
 }
 
 export interface Uploader {
@@ -101,11 +103,12 @@ export function Uploader(uploadStatus, settings): Uploader {
     });
   };
 
-  const handlerSuccess = function (blobInfo: BlobInfo, url: string): UploadResult {
+  const handlerSuccess = function (blobInfo: BlobInfo, url: string, opts?): UploadResult {
     return {
       url,
       blobInfo,
-      status: true
+      status: true,
+      opts
     };
   };
 
@@ -143,11 +146,11 @@ export function Uploader(uploadStatus, settings): Uploader {
           }
         };
 
-        const success = function (url) {
+        const success = function (url, opts?) {
           closeNotification();
           uploadStatus.markUploaded(blobInfo.blobUri(), url);
-          resolvePending(blobInfo.blobUri(), handlerSuccess(blobInfo, url));
-          resolve(handlerSuccess(blobInfo, url));
+          resolvePending(blobInfo.blobUri(), handlerSuccess(blobInfo, url, opts));
+          resolve(handlerSuccess(blobInfo, url, opts));
         };
 
         const failure = function (error) {

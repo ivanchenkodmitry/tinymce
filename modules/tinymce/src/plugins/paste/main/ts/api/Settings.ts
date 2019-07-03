@@ -15,6 +15,10 @@ const shouldPasteDataImages = (editor: Editor): boolean => {
   return editor.getParam('paste_data_images', false);
 };
 
+const shouldPasteAsPicture = (editor: Editor): boolean => {
+  return editor.getParam('paste_as_picture', false);
+};
+
 const shouldFilterDrop = (editor: Editor): boolean => {
   return editor.getParam('paste_filter_drop', true);
 };
@@ -74,6 +78,7 @@ const shouldUseDefaultFilters = (editor: Editor): boolean => {
 export default {
   shouldBlockDrop,
   shouldPasteDataImages,
+  shouldPasteAsPicture,
   shouldFilterDrop,
   getPreProcess,
   getPostProcess,

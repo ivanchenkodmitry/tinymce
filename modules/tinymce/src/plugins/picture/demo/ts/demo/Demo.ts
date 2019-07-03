@@ -21,6 +21,7 @@ tinymce.init({
   ],
   // images_upload_url: 'postAcceptor.php',
   file_picker_callback(callback, value, meta) {
+    // console.log('Callback', callback, value, meta);
     callback('https://www.google.com/logos/google.jpg', {
       alt: 'My alt text',
       sourceList: [
@@ -43,6 +44,9 @@ tinymce.init({
     });
   },
   images_upload_handler: (blobInfo, success, failure, progress) => {
+    // console.log('images_upload_handler', blobInfo, );
+    // console.log('images_upload_handler2', success, failure);
+    // console.log('images_upload_handler3', failure);
     Delay.setTimeout(function () {
       success('https://www.google.com/logos/google.jpg', {
         alt: 'My alt text',

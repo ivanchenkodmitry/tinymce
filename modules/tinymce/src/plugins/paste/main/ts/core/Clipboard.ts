@@ -21,6 +21,7 @@ import ProcessFilters from './ProcessFilters';
 import SmartPaste from './SmartPaste';
 import * as Whitespace from './Whitespace';
 import Utils from './Utils';
+import Settings from '../api/Settings';
 
 declare let window: any;
 
@@ -162,10 +163,17 @@ const pasteImage = (editor: Editor, imageItem) => {
     } else {
       blobInfo = existingBlobInfo;
     }
-
-    pasteHtml(editor, '<img src="' + blobInfo.blobUri() + '">', false);
+    if (Settings.shouldPasteAsPicture(editor)) {
+      pasteHtml(editor, '<picture><img src="' + blobInfo.blobUri() + '"></picture>', false);
+    } else {
+      pasteHtml(editor, '<img src="' + blobInfo.blobUri() + '">', false);
+    }
   } else {
-    pasteHtml(editor, '<img src="' + imageItem.uri + '">', false);
+    if (Settings.shouldPasteAsPicture(editor)) {
+      pasteHtml(editor, '<picture><img src="' + imageItem.uri + '"></picture>', false);
+    } else {
+      pasteHtml(editor, '<img src="' + imageItem.uri + '">', false);
+    }
   }
 };
 

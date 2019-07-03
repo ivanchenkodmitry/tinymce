@@ -114,7 +114,9 @@ const SelectionOverrides = function (editor: Editor): SelectionOverrides {
     if (blockCaretContainer.hasAttribute('data-mce-caret')) {
       CaretContainer.showCaretContainerBlock(blockCaretContainer);
       setRange(getRange()); // Removes control rect on IE
-      editor.selection.scrollIntoView(blockCaretContainer[0]);
+      if (blockCaretContainer[0]) {
+        editor.selection.scrollIntoView(blockCaretContainer[0]);
+      }
     }
   };
 
