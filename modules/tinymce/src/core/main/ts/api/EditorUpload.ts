@@ -5,7 +5,7 @@
  * For commercial licenses see https://www.tiny.cloud/
  */
 
-import { HTMLImageElement, Blob } from '@ephox/dom-globals';
+import {HTMLImageElement, Blob, HTMLPictureElement} from '@ephox/dom-globals';
 import { Arr } from '@ephox/katamari';
 import {Uploader, UploadResult} from '../file/Uploader';
 import { BlobInfoImagePair, ImageScanner } from '../file/ImageScanner';
@@ -110,7 +110,8 @@ const EditorUpload = function (editor: Editor): EditorUpload {
 
   const replacePictureUri = function (image: HTMLImageElement, uploadInfo: UploadResult) {
     const resultUri = uploadInfo.url;
-    const picture = image.parentNode;
+    const picture = <HTMLPictureElement> image.parentNode;
+    const sources = picture.getElementsByTagName('source');
     blobCache.removeByUri(image.src);
     replaceUrlInUndoStack(image.src, resultUri);
 
@@ -118,6 +119,10 @@ const EditorUpload = function (editor: Editor): EditorUpload {
       'src': Settings.shouldReuseFileName(editor) ? resultUri + cacheInvalidator() : resultUri,
       'data-mce-src': editor.convertURL(resultUri, 'src')
     });
+
+    while (sources.length > 0) {
+       sources[0].remove();
+    }
 
     for (const item of uploadInfo.opts.sourceList) {
       picture.appendChild(DOMUtils.DOM.create('source', { srcset: item.srcset, media: item.media, type: item.type }));
